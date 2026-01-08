@@ -6,13 +6,56 @@ WINDOW_HEIGHT = 667
 
 BG_DARK = "#1E1E1E"
 BG_LIGHT = "#F2F2F2"
-GREEN = "#2ECC71"
-RED = "#E74C3C"
+GREEN = "#0B4523"
+RED = "#991A0B"
 WHITE = "#FFFFFF"
 
 TITLE_FONT = ("Calibri", 22, "bold")
 COUNT_FONT = ("Calibri", 40, "bold")
 BUTTON_FONT = ("Calibri", 18, "bold")
+
+
+class RoundedButton(tk.Canvas):
+    def __init__(self, parent, width, height, radius, bg, fg, text, command):
+        super().__init__(
+            parent,
+            width=width,
+            height=height,
+            bg=parent["bg"],
+            highlightthickness=0
+        )
+        self.command = command
+
+        self.create_rounded_rect(0, 0, width, height, radius, fill=bg)
+        self.text_id = self.create_text(
+            width // 2,
+            height // 2,
+            text=text,
+            fill=fg,
+            font=BUTTON_FONT
+        )
+
+        self.bind("<Button-1>", lambda e: self.command())
+        self.bind("<Enter>", lambda e: self.itemconfig(
+            self.text_id, fill="#EAEAEA"))
+        self.bind("<Leave>", lambda e: self.itemconfig(self.text_id, fill=fg))
+
+    def create_rounded_rect(self, x1, y1, x2, y2, r, **kwargs):
+        points = [
+            x1 + r, y1,
+            x2 - r, y1,
+            x2, y1,
+            x2, y1 + r,
+            x2, y2 - r,
+            x2, y2,
+            x2 - r, y2,
+            x1 + r, y2,
+            x1, y2,
+            x1, y2 - r,
+            x1, y1 + r,
+            x1, y1
+        ]
+        self.create_polygon(points, smooth=True, **kwargs)
 
 
 class HemocytometerCounter:
@@ -60,29 +103,31 @@ class HemocytometerCounter:
     # ------------------ BUTTONS ------------------
     def create_buttons(self):
         button_frame = tk.Frame(self.window, bg=BG_LIGHT)
-        button_frame.pack(fill="x", pady=20)
+        button_frame.pack(pady=30)
 
-        count_button = tk.Button(
+        count_btn = RoundedButton(
             button_frame,
-            text="+  Count Cell",
-            font=BUTTON_FONT,
+            width=300,
+            height=60,
+            radius=25,
             bg=GREEN,
             fg=WHITE,
-            height=2,
+            text="+  Count Cell",
             command=self.increment_count
         )
-        count_button.pack(fill="x", padx=30, pady=10)
+        count_btn.pack(pady=12)
 
-        reset_button = tk.Button(
+        reset_btn = RoundedButton(
             button_frame,
-            text="⟳  Reset Counter",
-            font=BUTTON_FONT,
+            width=300,
+            height=60,
+            radius=25,
             bg=RED,
             fg=WHITE,
-            height=2,
+            text="⟳  Reset Counter",
             command=self.reset_count
         )
-        reset_button.pack(fill="x", padx=30)
+        reset_btn.pack()
 
     # ------------------ LOGIC ------------------
     def increment_count(self):
